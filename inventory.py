@@ -118,18 +118,14 @@ if __name__ == "__main__":
     # for each IP address we found, we store the reverse (i.e. the PTR
     # record), and a list of vhosts files that are located on that machine
     for ip in os.listdir(vhost_dir):
-        all_data[ip] = {}
-        all_data[ip]['reverse'] = ips[ip]
-        all_data[ip]["vhosts"] = []
-
+        all_data[ip] = {'reverse': ips[ip], "vhosts": []}
         # for each vhost file that was downloaded...
         for vhost_file in os.listdir(build_full_path(ip)):
             # we don't care about non-.conf files
             if not vhost_file.endswith(".conf"):
                 continue
 
-            data = {}
-            data['name'] = vhost_file
+            data = {"name": vhost_file}
 
             contents = open(build_full_path(ip, vhost_file)).read()
             # find all the ServerName and ServerAlias
