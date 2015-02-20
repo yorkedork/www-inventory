@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+<title>Foobar</title>
+<link rel="stylesheet" href="//cdn.research.pdx.edu/bootstrap/3.2.0/css/bootstrap.min.css">
+<script src="//cdn.research.pdx.edu/jquery/1.11.2/jquery-1.11.2.min.js"></script>
+<style type="text/css">
+.odd {
+    background-color:#f9f9f9;
+}
+
+.even {
+    background-color:#fff;
+}
+
+.invalid {
+    text-decoration:line-through;
+}
+</style>
+</head>
+<body>
+
+<p>Domains that are <strong class="invalid">stricken</strong> don't point at the corresponding IP address.
+Directories that are <strong class="text-danger">red</strong> are unsafe because they allow others to read/write/execute, or they are on inert.rc.pdx.edu and there exists a file/dir with o+w
+</p>
+<div class="alert alert-warning">
+    <p><strong>Directories that aren't used in /vol/www/ are:</strong></p>
+    {{ unused_dirs|join(', ') }}
+</div>
+<table class="table table-condensed">
+    <thead>
+        <tr>
+            <th>IP</th>
+            <th>Vhost File</th>
+            <th>Domains</th>
+            <th>Dirs</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ip, ip_info in data.items() %}
+            {% set parent = loop %}
+            {% for conf in ip_info.vhosts %}
+                <tr class="{{ parent.cycle('odd', 'even') }}">
+                    <td>{{ ip }} ({{ ip_info.reverse }})</td>
+                    <td>{{ conf.name }}</td>
+                    <td>
+                        <ul>
+                            {% for name_info in conf.names %}
+                                <li>
+                                    {% if not name_info.is_valid %}
+                                        <strong class="invalid">{{ name_info.value }}</strong>
+                                    {% else %}
+                                        {{ name_info.value }}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            {% for dir_info in conf.dirs %}
+                                <li>
+                                    {% if not dir_info.good_permissions %}
+                                        <strong class="text-danger">{{ dir_info.value }}</strong>
+                                    {% else %}
+                                        {{ dir_info.value }}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
+</body>
